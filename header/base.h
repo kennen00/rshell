@@ -3,7 +3,7 @@
 
 class Base {
     public:
-        virtual bool evaluate() = 0;
+        virtual bool execute() = 0;
 };
 
 #endif
