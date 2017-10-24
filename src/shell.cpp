@@ -7,8 +7,7 @@
 #include <list>
 
 Shell::Shell(): prompt("$ ") {}
-Shell::Shell(std::string prompt): prompt(prompt) {}
-
+Shell::Shell(std::string prompt): prompt(prompt) {} 
 void Shell::run() {
 	std::string cmd;
 	Base* executableCmd;
@@ -47,9 +46,9 @@ Base* Shell::parse(std::string &input) {
 		commands.push_back(*tok_iter);
 	}
 
+	//Break the ending semicolons off of strings and leaves them as seperate tokens.
 	for (auto it = commands.begin(); it != commands.end(); ++it) {
-
-		if (it->back() == ';') {
+		if (it->back() == ';' && (it->size() > 1)) {
 			//Remove semicolon and add to list immediately after command
 			it->pop_back();
 			++it;
@@ -58,6 +57,7 @@ Base* Shell::parse(std::string &input) {
 	}
 	
 
+	//TODO: Remove after done testing.
 	for (auto it = commands.begin(); it != commands.end(); ++it) {
 		std::cout << '<' << *it << "> ";
 	}
