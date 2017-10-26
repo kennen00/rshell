@@ -9,10 +9,10 @@ class Connector : public Base {
 	Base* right;
  public:
  	Connector(Base*, Base*);
-    virtual ~Connector();
+    	virtual ~Connector();
 	virtual bool execute() = 0;
-    virtual setLeft(Base *);
-    virtual setRight(Base *);
+    	virtual setLeft(Base *);
+    	virtual setRight(Base *);
 };
 
 #endif
