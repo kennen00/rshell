@@ -1,15 +1,17 @@
 #include "../header/shell.h" //Header file
 #include "../header/command.h"
 
-#include <string> //For string manipulation
 #include <boost/tokenizer.hpp> //For Tokenizer parsing
 
-#include <iostream> //For Testing
-#include <list>
-#include <vector> 
+#include <string> 		//For string manipulation
+#include <iostream> 	// I/O streams(testing)
+#include <list>			// STL list(parsing connected commands)
+#include <vector>		// STL vector(building commands)
+#include <stdlib.h>		// exit, EXIT_SUCCESS
 
 Shell::Shell(): prompt("$ ") {}
 Shell::Shell(std::string prompt): prompt(prompt) {} 
+
 void Shell::run() {
 	std::string cmd;
 	Base* executableCmd;
@@ -17,13 +19,20 @@ void Shell::run() {
 	while(1) {
 		std::cout << this->prompt;
 		std::getline(std::cin, cmd);
+
+		if (cmd == "exit") {
+			this->exit();
+		}
+
 		executableCmd = this->parse(cmd);
+		executableCmd->execute();
 	}
 
 	return;
 }
 
 void Shell::exit() {
+	std::exit(EXIT_SUCCESS);
 	return;
 }
 
@@ -38,32 +47,12 @@ Base* Shell::parse(std::string &input) {
 		}
 	}
 
-	typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-	boost::char_separator<char> sep(" ");
-	
-	tokenizer tok(input, sep);
-
-	//Fills vector with commands tokenized by spaces
-	for (tokenizer::iterator tok_iter = tok.begin(); tok_iter != tok.end(); ++tok_iter) {
-		commands.push_back(*tok_iter);
-	}
-
-	//Break the ending semicolons off of strings and leaves them as seperate tokens.
-	for (auto it = commands.begin(); it != commands.end(); ++it) {
-		if (it->back() == ';' && (it->size() > 1)) {
-			//Remove semicolon and add to list immediately after command
-			it->pop_back();
-			++it;
-			commands.insert(it, ";");
-		}
-	}
-	
-	return 0;
+	return this->buildCommand(input);
 }
 
 //Is passed in the unparsed text of the command and 
 // returns the build command leaf.
-//
+
 Base* Shell::buildCommand(std::string &input) {
 	typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 	boost::char_separator<char> sep(" ");
@@ -88,15 +77,3 @@ char* Shell::toCstring(const std::string s) {
 
 	return cstring;
 }
-
-
-
-
-
-
-
-
-
-
-
-
