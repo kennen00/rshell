@@ -16,7 +16,7 @@ class Shell {
 	Base* parse(std::string&);
 	Base* buildCommand(std::string&);
  private:
- 	char* toCstring(const std::string&);
+ 	char* toCstring(const std::string);
 };
 
 #endif

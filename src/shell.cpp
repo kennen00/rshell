@@ -79,8 +79,8 @@ Base* Shell::buildCommand(std::string &input) {
 	return new Command(cmd);
 }
 
-char* Shell::toCstring(const std::string& s) {
-	char cstring[s.size()];
+char* Shell::toCstring(const std::string s) {
+	char *cstring = new char[s.size()];
 	for (size_t i = 0; i < s.size(); ++i) {
 		cstring[i] = s.at(i);
 	}
