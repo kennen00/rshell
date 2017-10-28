@@ -5,14 +5,18 @@
 
 class Connector : public Base {
  protected:
+    //Left command of the connector
  	Base* left;
+
+    //Right command of the connector
 	Base* right;
  public:
+    //Constructs a connector by passing in a left and right Base*
  	Connector(Base*, Base*);
-    	virtual ~Connector();
+    virtual ~Connector();    
 	virtual bool execute() = 0;
-    	virtual void setLeft(Base *);
-    	virtual void setRight(Base *);
+    virtual void setLeft(Base *);
+    virtual void setRight(Base *);
 };
 
 #endif

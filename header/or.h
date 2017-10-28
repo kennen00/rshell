@@ -8,6 +8,8 @@ class Or : public Connector {
  	//TODO: Determine if more are needed.
  public:
  	Or(Base*, Base*);
+
+    //Executes the left command. If it fails, executes the right command and returns that result
  	bool execute();
 };
 

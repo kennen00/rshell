@@ -8,6 +8,8 @@ class And : public Connector {
  	//TODO: Determine if more are needed.
  public:
  	And(Base*, Base*);
+
+    //Executes the left command. If it succceeds, executes the right one and returns that result
  	bool execute();
 };
 

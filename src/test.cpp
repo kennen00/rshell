@@ -1,3 +1,5 @@
+//Used by Kennen to test the execution of commands
+
 #include <iostream>
 
 #include "../header/command.h"
