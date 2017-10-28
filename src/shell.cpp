@@ -30,7 +30,9 @@ void Shell::run() {
 
 		if (cmd == "exit") {
 			this->exit();
-		}
+		} else if (cmd.front() == ' ' || cmd.empty()) {
+            continue;
+        }
 
 		executableCmd = this->parse(cmd);
 		executableCmd->execute();
