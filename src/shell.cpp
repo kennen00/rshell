@@ -12,6 +12,14 @@
 Shell::Shell(): prompt("$ ") {}
 Shell::Shell(std::string prompt): prompt(prompt) {} 
 
+/**
+* The main execution loop that displays prompts, and calls all 
+*  necesary functions to ensure constant execution of the
+*  rshell.
+*
+* @param None.
+* @return Nothing, exits before return.
+*/
 void Shell::run() {
 	std::string cmd;
 	Base* executableCmd;
@@ -31,11 +39,24 @@ void Shell::run() {
 	return;
 }
 
+/**
+* Special exit command that exists the shell w/o an error code.
+*
+* @param None.
+* @return Nothing, exits before return.
+*/
 void Shell::exit() {
 	std::exit(EXIT_SUCCESS);
 	return;
 }
 
+/**
+* Parse the user input, build command expression tree and return
+* the root node pointer.
+*
+* @param String: User input to the shell prompt.
+* @return Base*: Point to root of command expression tree.
+*/
 Base* Shell::parse(std::string &input) {
 	std::list<std::string> commands;
 
@@ -50,9 +71,14 @@ Base* Shell::parse(std::string &input) {
 	return this->buildCommand(input);
 }
 
-//Is passed in the unparsed text of the command and 
-// returns the build command leaf.
-
+/**
+* Build a single command leaf that is dynamically allocated,
+*  and return that to be used in either simple or more complex
+*  experssion trees.
+*
+* @param String: String for one single command.
+* @return Base*: Pointer to command leaf to corresponding input.
+*/
 Base* Shell::buildCommand(std::string &input) {
 	typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 	boost::char_separator<char> sep(" ");
@@ -68,6 +94,13 @@ Base* Shell::buildCommand(std::string &input) {
 	return new Command(cmd);
 }
 
+/**
+* Convert a STL string into a C-String which is accepted by 
+*  the command class for executeable objects.
+*
+* @param String: C++ String class that is to be converted.
+* @return Char*: C-string for the correspond string.
+*/
 char* Shell::toCstring(const std::string s) {
 	char *cstring = new char[s.size()];
 	for (size_t i = 0; i < s.size(); ++i) {
