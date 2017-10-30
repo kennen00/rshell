@@ -11,7 +11,7 @@ Command::Command(std::vector<char *> args) : args(args) {
 }
 
 bool Command::execute() {
-    pid_t pid, wpid;
+    pid_t pid;
     int statVal;
 
     pid = fork();
@@ -26,7 +26,7 @@ bool Command::execute() {
         return false;
     } else {
         do {
-           wpid = waitpid(pid, &statVal, 0); 
+           waitpid(pid, &statVal, 0); 
         } while (!WIFEXITED(statVal));
     }
 
