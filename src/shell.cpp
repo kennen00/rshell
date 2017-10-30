@@ -30,7 +30,7 @@ void Shell::run() {
 
 		if (cmd == "exit") {
 			this->exit();
-		} else if (cmd.front() == ' ' || cmd.empty()) {
+		} else if (cmd.front() == ' ' || cmd.front() == '#' || cmd.empty()) {
             continue;
         }
 
