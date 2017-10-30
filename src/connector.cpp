@@ -3,15 +3,10 @@
 Connector::Connector(Base *left, Base *right) : left(left), right(right) {
 }
 
-Connector::~Connector() {
-    delete left;
-    delete right;
-}
-
-Connector::setLeft(Base *left) {
+void Connector::setLeft(Base *left) {
     this->left = left;
 }
 
-Connector::setRight(Base *right) {
+void Connector::setRight(Base *right) {
     this->right = right;
 }
