@@ -68,7 +68,35 @@ Base* Shell::parse(std::string &input) {
 		}
 	}
 
-	return this->buildCommand(input);
+	// Tokenize string by spaces
+	typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+	boost::char_separator<char> sep(" ");
+
+	tokenizer tok(input, sep);
+
+	for (tokenizer::iterator tok_it = tok.begin(); tok_it != tok.end(); ++tok_it) {
+		commands.push_back(*tok_it);
+	}
+
+	std::vector<Base*> tree;
+
+	while (!commands.empty()) {
+		std::vector<std::string> cmd;
+
+		while ((commands.front() != "||") && (commands.front() != "&&") && (commands.front() != ";")) {
+			cmd.push_back(commands.front());
+			commands.pop_front();
+		}
+
+		if (!cmd.empty()) {
+			tree.push_back(this->buildCommand(cmd));
+		}
+
+		
+
+	}
+
+	return tree.at(0);
 }
 
 /**
@@ -79,16 +107,11 @@ Base* Shell::parse(std::string &input) {
 * @param String: String for one single command.
 * @return Base*: Pointer to command leaf to corresponding input.
 */
-Base* Shell::buildCommand(std::string &input) {
-	typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-	boost::char_separator<char> sep(" ");
+Base* Shell::buildCommand(std::vector<std::string> &input) {
+	std::vector<char *> cmd;
 
-	tokenizer tok(input, sep);
-	
-	std::vector<char*> cmd;
-
-	for (tokenizer::iterator tok_it = tok.begin(); tok_it != tok.end(); ++tok_it) {
-		cmd.push_back(toCstring(*tok_it));
+	for (size_t i = 0; i < input.size(); ++i) {
+		cmd.push_back(toCstring(input.at(i)));
 	}
 
 	return new Command(cmd);
