@@ -4,6 +4,8 @@ EXEC = bin/rshell
 SOURCES = $(wildcard src/*.cpp)
 OBJECTS = $(SOURCES:.cpp=.o)
 
+all: $(EXEC)
+
 $(EXEC): $(OBJECTS)
 	mkdir -p bin 		
 	$(CC) $(OBJECTS) -o $(EXEC)
