@@ -35,9 +35,7 @@ void Shell::run() {
 		std::cout << this->prompt;
 		std::getline(std::cin, cmd);
 
-		if (cmd == "exit") {
-			this->exit();
-		} else if (cmd.front() == ' ' || cmd.front() == '#' || cmd.empty()) {
+		if (cmd.front() == ' ' || cmd.front() == '#' || cmd.empty()) {
             continue;
         }
 
@@ -47,20 +45,7 @@ void Shell::run() {
 	}
 	return;
 }
-
-
-/**
-* Special exit command that exists the shell w/o an error code.
-*
-* @param None.
-* @return Nothing, exits before return.
-*/
-void Shell::exit() {
-	std::exit(EXIT_SUCCESS);
-	return;
-}
  
-
 /**
 * Parse the user input, build command expression tree and return
 * the root node pointer.

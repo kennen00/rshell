@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <cstdlib>
+#include <cstring>
 
 #include "../header/command.h"
 
@@ -11,6 +12,9 @@ Command::Command(std::vector<char *> args) : args(args) {
 }
 
 bool Command::execute() {
+    if (!(strcmp(args.at(0), (char *)"exit"))) {
+        std::exit(EXIT_SUCCESS);
+    }
     pid_t pid;
     int statVal;
 

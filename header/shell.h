@@ -14,7 +14,6 @@ class Shell {
  	Shell();
  	Shell(std::string);
  	void run();
-	void exit();
 	std::list<std::string> parse(std::string&);
 	Base* buildTree(std::list<std::string>&);
 	Base* buildCommand(std::vector<std::string>&);
