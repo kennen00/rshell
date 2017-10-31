@@ -7,6 +7,7 @@ class And : public Connector {
  private:
  	//TODO: Determine if more are needed.
  public:
+ 	And();
  	And(Base*, Base*);
  	bool execute();
 };

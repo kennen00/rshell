@@ -1,5 +1,9 @@
-#include "../header/shell.h" //Header file
+#include "../header/shell.h" 	//Header files
 #include "../header/command.h"
+#include "../header/terminate.h"
+#include "../header/and.h"
+#include "../header/or.h"
+#include "../header/base.h"
 
 #include <boost/tokenizer.hpp> //For Tokenizer parsing
 
@@ -7,10 +11,12 @@
 #include <iostream> 	// I/O streams(testing)
 #include <list>			// STL list(parsing connected commands)
 #include <vector>		// STL vector(building commands)
+#include <stack>		// STL stack(reversing command expression)
 #include <stdlib.h>		// exit, EXIT_SUCCESS
 
 Shell::Shell(): prompt("$ ") {}
 Shell::Shell(std::string prompt): prompt(prompt) {} 
+
 
 /**
 * The main execution loop that displays prompts, and calls all 
@@ -22,6 +28,7 @@ Shell::Shell(std::string prompt): prompt(prompt) {}
 */
 void Shell::run() {
 	std::string cmd;
+	std::list<std::string> parsedInput;
 	Base* executableCmd;
 
 	while(1) {
@@ -32,12 +39,13 @@ void Shell::run() {
 			this->exit();
 		}
 
-		executableCmd = this->parse(cmd);
+		parsedInput = this->parse(cmd);
+		executableCmd = buildTree(parsedInput);
 		executableCmd->execute();
 	}
-
 	return;
 }
+
 
 /**
 * Special exit command that exists the shell w/o an error code.
@@ -49,6 +57,7 @@ void Shell::exit() {
 	std::exit(EXIT_SUCCESS);
 	return;
 }
+ 
 
 /**
 * Parse the user input, build command expression tree and return
@@ -57,7 +66,7 @@ void Shell::exit() {
 * @param String: User input to the shell prompt.
 * @return Base*: Point to root of command expression tree.
 */
-Base* Shell::parse(std::string &input) {
+std::list<std::string> Shell::parse(std::string &input) {
 	std::list<std::string> commands;
 
 	//Remove comments from the command string
@@ -78,26 +87,58 @@ Base* Shell::parse(std::string &input) {
 		commands.push_back(*tok_it);
 	}
 
-	std::vector<Base*> tree;
+	for (std::list<std::string>::iterator it = commands.begin(); it != commands.end(); ++it) {
+		if (it->back() == ';' && (it->size() > 1)) {
+			it->pop_back();
+			++it;
+			commands.insert(it, ";");
+		}
+	}
+
+	return commands;
+}
+
+
+/**
+* Take the parsed input and build the expression tree using the
+*  shunting-yard algorithm for an expression tree
+*
+* @param STL list<string> that was returned by the parse function
+* @return Base*: Point to root of command expression tree.
+*/
+Base* Shell::buildTree(std::list<std::string>& commands) {
+	std::stack<Base*> stack;
 
 	while (!commands.empty()) {
 		std::vector<std::string> cmd;
 
-		while ((commands.front() != "||") && (commands.front() != "&&") && (commands.front() != ";")) {
+		while (!isConnector(commands.front()) && !commands.empty()) {
 			cmd.push_back(commands.front());
 			commands.pop_front();
 		}
 
 		if (!cmd.empty()) {
-			tree.push_back(this->buildCommand(cmd));
+			stack.push(this->buildCommand(cmd));
+			std::cout << "Built a command. ";
+		} else if (commands.front() == ";") {
+			stack.push(new Terminate()); 
+			commands.pop_front();
+			std::cout << "Built a Terminate connector. ";
+		} else if (commands.front() == "||") {
+			stack.push(new Or()); 
+			commands.pop_front();
+			std::cout << "Built a Or connector. ";
+		} else if (commands.front() == "&&") {
+			stack.push(new And()); 
+			commands.pop_front();
+			std::cout << "Built a And connector. ";
 		}
-
-		
-
 	}
+	std::cout << std::endl;
 
-	return tree.at(0);
+	return stack.top();
 }
+
 
 /**
 * Build a single command leaf that is dynamically allocated,
@@ -132,4 +173,26 @@ char* Shell::toCstring(const std::string s) {
 	cstring[s.size()] = '\0';
 
 	return cstring;
+}
+
+/**
+* Take an STL string and compare it to the list
+*  of known connection classes.
+*
+* @param String: C++ String class that is to be compared.
+* @return Bool;  Logial result of if the input is in the list.
+*/
+bool Shell::isConnector(const std::string& s) {
+	std::vector<std::string> v;
+
+	v.push_back(";");
+	v.push_back("&&");
+	v.push_back("||");
+
+	for (size_t i = 0; i < v.size(); ++i) {
+		if (v.at(i) == s) {
+			return true;
+		}
+	}
+	return false;
 }
