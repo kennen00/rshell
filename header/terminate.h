@@ -12,6 +12,7 @@ class Terminate : public Connector {
 
     //Executes the left command, and then executes the right command. Returns the result of the right
 	bool execute();
+	bool isConnector();
 };
 
 #endif

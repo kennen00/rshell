@@ -14,6 +14,7 @@ class Connector : public Base {
     //Constructs a connector by passing in a left and right Base*
  	Connector(Base*, Base*);
 	virtual bool execute() = 0;
+	virtual bool isConnector() = 0;
     virtual void setLeft(Base *);
     virtual void setRight(Base *);
 };

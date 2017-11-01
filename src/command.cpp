@@ -11,6 +11,10 @@ Command::Command(std::vector<char *> args) : args(args) {
     this->args.push_back((char *) 0);
 }
 
+bool Command::isConnector() {
+	return false;
+}
+
 bool Command::execute() {
     if (!(strcmp(args.at(0), (char *)"exit"))) {
         std::exit(EXIT_SUCCESS);

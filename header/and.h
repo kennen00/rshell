@@ -12,6 +12,7 @@ class And : public Connector {
 
     //Executes the left command. If it succceeds, executes the right one and returns that result
  	bool execute();
+	bool isConnector();
 };
 
 #endif

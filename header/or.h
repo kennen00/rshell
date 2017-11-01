@@ -12,6 +12,7 @@ class Or : public Connector {
 
     //Executes the left command. If it fails, executes the right command and returns that result
  	bool execute();
+	bool isConnector();
 };
 
 #endif

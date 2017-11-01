@@ -16,6 +16,7 @@ class Command : public Base {
 
         //Executes the arguments in args using syscalls
         bool execute();
+		bool isConnector();
 };
 
 #endif

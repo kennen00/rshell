@@ -3,6 +3,10 @@
 Connector::Connector(Base *left, Base *right) : left(left), right(right) {
 }
 
+bool Connector::isConnector() {
+	return true;
+}
+
 void Connector::setLeft(Base *left) {
     this->left = left;
 }
