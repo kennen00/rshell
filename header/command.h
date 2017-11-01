@@ -12,6 +12,7 @@ class Command : public Base {
     public:
         Command(std::vector<char *>);
         bool execute();
+		bool isConnector();
 };
 
 #endif

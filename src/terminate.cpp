@@ -8,3 +8,7 @@ bool Terminate::execute() {
     left->execute();
     return right->execute();
 }
+
+bool Terminate::isConnector() {
+	return true;
+}

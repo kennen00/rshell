@@ -10,3 +10,7 @@ bool And::execute() {
     }
     return false;
 }
+
+bool And::isConnector() {
+	return true;
+}

@@ -10,6 +10,7 @@ class Or : public Connector {
  	Or();
  	Or(Base*, Base*);
  	bool execute();
+	bool isConnector();
 };
 
 #endif

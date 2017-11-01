@@ -10,6 +10,10 @@ Command::Command(std::vector<char *> args) : args(args) {
     this->args.push_back((char *) 0);
 }
 
+bool Command::isConnector() {
+	return false;
+}
+
 bool Command::execute() {
     pid_t pid;
     int statVal;
