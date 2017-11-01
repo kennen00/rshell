@@ -4,6 +4,7 @@
 #include "../header/and.h"
 #include "../header/or.h"
 #include "../header/base.h"
+#include "../header/connector.h"
 
 #include <boost/tokenizer.hpp> //For Tokenizer parsing
 
@@ -119,24 +120,71 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 
 		if (!cmd.empty()) {
 			stack.push(this->buildCommand(cmd));
-			std::cout << "Built a command. ";
 		} else if (commands.front() == ";") {
 			stack.push(new Terminate()); 
 			commands.pop_front();
-			std::cout << "Built a Terminate connector. ";
 		} else if (commands.front() == "||") {
 			stack.push(new Or()); 
 			commands.pop_front();
-			std::cout << "Built a Or connector. ";
 		} else if (commands.front() == "&&") {
 			stack.push(new And()); 
 			commands.pop_front();
-			std::cout << "Built a And connector. ";
 		}
 	}
-	std::cout << std::endl;
 
-	return stack.top();
+	//Reverse the commands so that the tree is correct
+	std::vector<Base*> reversedCmds;
+
+	while(!stack.empty()) {
+		reversedCmds.push_back(stack.top());
+		stack.pop();
+	}
+
+	//Arrange the commands to be in postfix notations
+	std::stack<Base*> connectorStack;
+	std::vector<Base*> postfix;
+
+	for (size_t i = 0; i < reversedCmds.size(); ++i) {
+		if (reversedCmds.at(i)->isConnector()) {
+			if (connectorStack.empty()) {
+				connectorStack.push(reversedCmds.at(i));
+			} else {
+				postfix.push_back(connectorStack.top());
+				connectorStack.pop();
+				connectorStack.push(reversedCmds.at(i));
+			}
+		} else {
+			postfix.push_back(reversedCmds.at(i));
+		}
+
+		if (i == reversedCmds.size() - 1) {
+			if (!connectorStack.empty()) {
+				postfix.push_back(connectorStack.top());
+			}
+		}
+	}
+
+	//Build the expression tree from the postfix notation
+	std::stack<Base*> tree;
+
+	for (size_t i = 0; i < postfix.size(); ++i) {
+		if (postfix.at(i)->isConnector()) {
+			Base* left = tree.top();
+			tree.pop();
+			Base* right = tree.top();
+			tree.pop();
+			
+			Connector* connector = static_cast<Connector*>(postfix.at(i));
+			connector->setLeft(left);
+			connector->setRight(right);
+
+			tree.push(connector);
+		} else {
+			tree.push(postfix.at(i));
+		}
+	}
+
+	return tree.top();
 }
 
 
