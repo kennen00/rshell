@@ -9,8 +9,6 @@ class Or : public Connector {
  public:
  	Or();
  	Or(Base*, Base*);
-
-    //Executes the left command. If it fails, executes the right command and returns that result
  	bool execute();
 	bool isConnector();
 };

@@ -1,6 +1,15 @@
 #!/bin/sh
 
-#Strictly comments
-echo hello #With more comments
-ls -a -l #echo no run; pwd
-pwd; echo hello again && ls #|| comments yo
+./start.sh
+
+../bin/rshell < inputs/commented_input.txt > commented_output.txt
+echo -e "\n" >> commented_output.txt
+
+if cmp -s commented_output.txt expects/commented_expect.txt; then
+    echo Tests Passed!
+else 
+    echo Tests Failed!
+    diff commented_output.txt expects/commented_expect.txt
+fi
+
+./clean.sh

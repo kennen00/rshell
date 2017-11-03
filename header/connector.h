@@ -11,7 +11,6 @@ class Connector : public Base {
     //Right command of the connector
 	Base* right;
  public:
-    //Constructs a connector by passing in a left and right Base*
  	Connector(Base*, Base*);
 	virtual bool execute() = 0;
 	virtual bool isConnector() = 0;

@@ -1,5 +1,5 @@
-echo hello; ls -a; pwd
-echo hello again && ls -a && mk && echo no run
-mkdir temp || echo hello once again || ls -a
-echo goodbye; ls -a && pwd || git status
+echo hello; ls -a temp/; pwd
+echo hello again && rm temp/test3 && mk && echo no run
+mkdir temp || echo hello once again || ls temp/
+echo goodbye; mv temp/test1 temp/test2 && pwd || git status
 exit

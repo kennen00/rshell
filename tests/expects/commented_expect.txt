@@ -1,9 +1,11 @@
-$ hello
-$ .
-..
-test1
+$ $ hello
+$ test1
 test2
 test3
 $ /home/csgrads/kdere004/cs100/rshell-hooli/tests
-$ $ 
+hello again
+test1
+test2
+test3
+$ 
 

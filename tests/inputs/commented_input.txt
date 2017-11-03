@@ -1,0 +1,5 @@
+#Strictly comments
+echo hello #With more comments
+ls temp/ #echo no run; pwd
+pwd; echo hello again && ls temp/ #|| comments yo
+exit

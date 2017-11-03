@@ -1,6 +1,15 @@
 #!/bin/sh
 
-echo hello; ls -a -l; ps
-echo hello again && ls -al && mk && echo no run
-mkdir src || echo hello once again || ls -a
-echo goodbye; ls -a && pwd || git status
+./start.sh
+
+../bin/rshell < inputs/multi_input.txt > multi_output.txt
+echo -e "\n" >> multi_output.txt
+
+if cmp -s multi_output.txt expects/multi_expect.txt; then
+    echo Tests Passed!
+else
+    echo Tests Failed!
+    diff multi_output.txt expects/multi_expect.txt
+fi
+
+./clean.sh
