@@ -80,6 +80,7 @@ std::list<std::string> Shell::parse(std::string &input) {
 			it->pop_back();
 			++it;
 			commands.insert(it, ";");
+			--it;
 		}
 	}
 
