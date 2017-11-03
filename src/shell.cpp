@@ -52,7 +52,7 @@ void Shell::run() {
 * the root node pointer.
 *
 * @param String: User input to the shell prompt.
-* @return Base*: Point to root of command expression tree.
+* @return STL list<string>: List of arguments and connectors with spaces removed
 */
 std::list<std::string> Shell::parse(std::string &input) {
 	std::list<std::string> commands;
