@@ -1,8 +1,5 @@
 #!/bin/sh
 
-./bin/rshell
-exit
-./bin/rshell
-ls -a; exit && ps
-./bin/rshell
-ls -al; pwd && exit
+echo exit | ../bin/rshell
+echo "ls -a; exit && /ps" | ../bin/rshell
+echo "ls -al; pwd && exit" | ../bin/rshell
