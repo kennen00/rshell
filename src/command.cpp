@@ -11,6 +11,12 @@ Command::Command(std::vector<char *> args) : args(args) {
     this->args.push_back((char *) 0);
 }
 
+Command::~Command() {
+    for (unsigned int i = 0; i < args.size() - 1; ++i) {
+        delete[] args.at(i);
+    }
+}
+
 /**
 * Simple property evaluation function. Returns true if the
 * object is a connector.
