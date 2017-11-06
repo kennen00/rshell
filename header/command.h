@@ -11,6 +11,7 @@ class Command : public Base {
         std::vector<char *> args;
     public:
         Command(std::vector<char *>);
+        ~Command();
         bool execute();
 		bool isConnector();
 };

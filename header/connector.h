@@ -12,6 +12,7 @@ class Connector : public Base {
 	Base* right;
  public:
  	Connector(Base*, Base*);
+    ~Connector();
 	virtual bool execute() = 0;
 	virtual bool isConnector() = 0;
     virtual void setLeft(Base *);

@@ -42,6 +42,7 @@ void Shell::run() {
 		parsedInput = this->parse(cmd);
 		executableCmd = buildTree(parsedInput);
 		executableCmd->execute();
+        delete executableCmd;
 	}
 	return;
 }
@@ -189,7 +190,7 @@ Base* Shell::buildCommand(std::vector<std::string> &input) {
 * @return Char*: C-string for the correspond string.
 */
 char* Shell::toCstring(const std::string s) {
-	char *cstring = new char[s.size()];
+	char *cstring = new char[s.size() + 1];
 	for (size_t i = 0; i < s.size(); ++i) {
 		cstring[i] = s.at(i);
 	}
