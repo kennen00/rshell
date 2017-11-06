@@ -70,7 +70,7 @@ bool Command::test() {
     if (!(strcmp(args.at(1), (char *) "-e"))) {
         int error = stat(args.at(2), &sb);
         if (error) {
-            if (error == ENOENT) {
+            if (errno == ENOENT) {
                 std::cout << "(False)" << std::endl;
             } else {
                 perror("stat");
@@ -82,7 +82,7 @@ bool Command::test() {
     } else if (!(strcmp(args.at(1), (char *) "-f"))) {
         int error = stat(args.at(2), &sb);
         if (error) {
-            if (error == ENOENT) {
+            if (errno == ENOENT) {
                 std::cout << "(False)" << std::endl;
             } else {
                 perror("stat");
@@ -100,7 +100,7 @@ bool Command::test() {
     } else if (!(strcmp(args.at(1), (char *) "-d"))) {
         int error = stat(args.at(2), &sb);
         if (error) {
-            if (error == ENOENT) {
+            if (errno == ENOENT) {
                 std::cout << "(False)" << std::endl;
             } else {
                 perror("stat");
@@ -118,7 +118,7 @@ bool Command::test() {
     } else {
         int error = stat(args.at(1), &sb);
         if (error) {
-            if (error == ENOENT) {
+            if (errno == ENOENT) {
                 std::cout << "(False)" << std::endl;
             } else {
                 perror("stat");
