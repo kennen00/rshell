@@ -14,6 +14,8 @@ class Command : public Base {
         ~Command();
         bool execute();
 		bool isConnector();
+    private:
+        bool test();
 };
 
 #endif

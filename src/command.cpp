@@ -1,9 +1,11 @@
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 
 #include "../header/command.h"
 
@@ -44,6 +46,9 @@ bool Command::execute() {
 
     pid = fork();
     if (!pid) {
+        if (!(strcmp(args.at(0), (char *)"test"))) {
+            return test();
+        }
         if (execvp(args.at(0), &args.at(0))) {
             perror("Error executing");
             exit(1);
@@ -57,6 +62,72 @@ bool Command::execute() {
            waitpid(pid, &statVal, 0); 
         } while (!WIFEXITED(statVal));
     }
-
     return !WEXITSTATUS(statVal);
+}
+
+bool Command::test() {
+    struct stat sb;
+    if (!(strcmp(args.at(1), (char *) "-e"))) {
+        int error = stat(args.at(2), &sb);
+        if (error) {
+            if (error == ENOENT) {
+                std::cout << "(False)" << std::endl;
+            } else {
+                perror("stat");
+            }
+            exit(1);
+            return false;
+        }
+        std::cout << "(True)" << std::endl;
+    } else if (!(strcmp(args.at(1), (char *) "-f"))) {
+        int error = stat(args.at(2), &sb);
+        if (error) {
+            if (error == ENOENT) {
+                std::cout << "(False)" << std::endl;
+            } else {
+                perror("stat");
+            }
+            exit(1);
+            return false;
+        }
+        if (S_ISREG(sb.st_mode)) {
+            std::cout << "(True)" << std::endl;
+        } else {
+            std::cout << "(False)" << std::endl;
+            exit(1);
+            return false;
+        }
+    } else if (!(strcmp(args.at(1), (char *) "-d"))) {
+        int error = stat(args.at(2), &sb);
+        if (error) {
+            if (error == ENOENT) {
+                std::cout << "(False)" << std::endl;
+            } else {
+                perror("stat");
+            }
+            exit(1);
+            return false;
+        }
+        if (S_ISDIR(sb.st_mode)) {
+            std::cout << "(True)" << std::endl;
+        } else {
+            std::cout << "(False)" << std::endl;
+            exit(1);
+            return false;
+        }
+    } else {
+        int error = stat(args.at(1), &sb);
+        if (error) {
+            if (error == ENOENT) {
+                std::cout << "(False)" << std::endl;
+            } else {
+                perror("stat");
+            }
+            exit(1);
+            return false;
+        }
+        std::cout << "(True)" << std::endl;
+    }
+    exit(0);
+    return true;
 }
