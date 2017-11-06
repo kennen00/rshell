@@ -6,9 +6,8 @@
 #include "../header/base.h"
 #include "../header/connector.h"
 
-#include <boost/tokenizer.hpp> //For Tokenizer parsing
-
-#include <string> 		//For string manipulation
+#include <regex>		// Parsing string input
+#include <string> 		// For string manipulation
 #include <iostream> 	// I/O streams(testing)
 #include <list>			// STL list(parsing connected commands)
 #include <vector>		// STL vector(building commands)
@@ -58,30 +57,18 @@ std::list<std::string> Shell::parse(std::string &input) {
 	std::list<std::string> commands;
 
 	//Remove comments from the command string
-	for (size_t i = 0; i < input.size(); ++i) {
-		if (input.at(i) == '#') {
-			input = input.substr(0, i);
-			break;
-		}
-	}
+	size_t index = input.find("#");
+	input = input.substr(0, index);
 
-	// Tokenize string by spaces
-	typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-	boost::char_separator<char> sep(" ");
+	// Tokenize string by spaces and semicolons
+	std::regex expr("([;]|[^\\s;]+)");
 
-	tokenizer tok(input, sep);
+	std::regex_token_iterator<std::string::iterator> rit{input.begin(), input.end(), expr};
+	std::regex_token_iterator<std::string::iterator> rend;
 
-	for (tokenizer::iterator tok_it = tok.begin(); tok_it != tok.end(); ++tok_it) {
-		commands.push_back(*tok_it);
-	}
-
-	for (std::list<std::string>::iterator it = commands.begin(); it != commands.end(); ++it) {
-		if (it->back() == ';' && (it->size() > 1)) {
-			it->pop_back();
-			++it;
-			commands.insert(it, ";");
-			--it;
-		}
+	while (rit != rend) {
+		commands.push_back(rit->str());
+		rit++;
 	}
 
 	return commands;
