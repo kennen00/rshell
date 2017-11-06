@@ -48,11 +48,13 @@ void Shell::run() {
 }
  
 /**
-* Parse the user input, build command expression tree and return
-* the root node pointer.
+* Parse the user input: remove all comments, replace 
+*  test operators [ ] with test command, tokenize
+*  input by: spaces, semicolons, and parenthesis.
 *
 * @param String: User input to the shell prompt.
-* @return STL list<string>: List of arguments and connectors with spaces removed
+* @return List of strings: Tokenized input that will be
+*			passed to the build tree function.
 */
 std::list<std::string> Shell::parse(std::string &input) {
 	std::list<std::string> commands;
@@ -61,8 +63,13 @@ std::list<std::string> Shell::parse(std::string &input) {
 	size_t index = input.find("#");
 	input = input.substr(0, index);
 
+	//Replace test operators with test command ([ -e ... ] -> test -s ...)
+	std::regex test("\\[(.+?)\\]");
+	std::string replaceString = "test $1";
+	input = regex_replace(input, test, replaceString);
+
 	// Tokenize string by spaces and semicolons
-	std::regex expr("([;]|[^\\s;]+)");
+	std::regex expr("([;\\(\\)]|[^\\s;\\(\\)]+)");
 
 	std::regex_token_iterator<std::string::iterator> rit{input.begin(), input.end(), expr};
 	std::regex_token_iterator<std::string::iterator> rend;
