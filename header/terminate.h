@@ -9,8 +9,6 @@ class Terminate : public Connector {
  public:
  	Terminate();
  	Terminate(Base*, Base*);
-
-    //Executes the left command, and then executes the right command. Returns the result of the right
 	bool execute();
 	bool isConnector();
 };
