@@ -5,6 +5,7 @@
 #include "../header/or.h"
 #include "../header/base.h"
 #include "../header/connector.h"
+#include "../header/parenthesis.h"
 
 #include <regex>		// Parsing string input
 #include <string> 		// For string manipulation
@@ -112,6 +113,12 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 		} else if (commands.front() == "&&") {
 			stack.push(new And()); 
 			commands.pop_front();
+		} else if (commands.front() == "(") {
+			stack.push(new openParen());
+			commands.pop_front();
+		} else if (commands.front() == ")") {
+			stack.push(new closeParen());
+			commands.pop_front();
 		}
 	}
 
@@ -128,34 +135,37 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 	std::vector<Base*> postfix;
 
 	for (size_t i = 0; i < reversedCmds.size(); ++i) {
-		if (reversedCmds.at(i)->isConnector()) {
+		if (reversedCmds.at(i)->precedence() == 2) { //Cmd is a left parenthesis
+			connectorStack.push(reversedCmds.at(i));
+		} else if (reversedCmds.at(i)->precedence() == 3) { //Cmd is a right parenthesis
+			while (connectorStack.top()->precedence() != 2 && !connectorStack.empty()) {
+				postfix.push_back(popAndReturn(connectorStack));
+			}
+			if (!connectorStack.empty()) connectorStack.pop();
+			
+		} else if (reversedCmds.at(i)->precedence() == 1) { //Cmd is a connector
 			if (connectorStack.empty()) {
 				connectorStack.push(reversedCmds.at(i));
 			} else {
-				postfix.push_back(connectorStack.top());
-				connectorStack.pop();
+				postfix.push_back(popAndReturn(connectorStack));
 				connectorStack.push(reversedCmds.at(i));
 			}
-		} else {
+		} else if (reversedCmds.at(i)->precedence() == 0) { //Cmd is a command
 			postfix.push_back(reversedCmds.at(i));
 		}
-
-		if (i == reversedCmds.size() - 1) {
-			if (!connectorStack.empty()) {
-				postfix.push_back(connectorStack.top());
-			}
-		}
+	}
+	
+	if (!connectorStack.empty()) {
+		postfix.push_back(connectorStack.top());
 	}
 
 	//Build the expression tree from the postfix notation
 	std::stack<Base*> tree;
 
 	for (size_t i = 0; i < postfix.size(); ++i) {
-		if (postfix.at(i)->isConnector()) {
-			Base* left = tree.top();
-			tree.pop();
-			Base* right = tree.top();
-			tree.pop();
+		if (postfix.at(i)->precedence() == 1) {
+			Base* left = popAndReturn(tree);
+			Base* right = popAndReturn(tree);
 			
 			Connector* connector = static_cast<Connector*>(postfix.at(i));
 			connector->setLeft(left);
@@ -219,6 +229,8 @@ bool Shell::isConnector(const std::string& s) {
 	v.push_back(";");
 	v.push_back("&&");
 	v.push_back("||");
+	v.push_back("(");
+	v.push_back(")");
 
 	for (size_t i = 0; i < v.size(); ++i) {
 		if (v.at(i) == s) {
@@ -226,4 +238,15 @@ bool Shell::isConnector(const std::string& s) {
 		}
 	}
 	return false;
+}
+
+Base* Shell::popAndReturn(std::stack<Base*>& s) {
+	if (!s.empty()) {
+		Base* returnVal = s.top();
+		s.pop();
+
+		return returnVal;
+	}
+
+	return 0;
 }

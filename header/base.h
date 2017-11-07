@@ -6,7 +6,7 @@ class Base {
     public:
         virtual ~Base() {}
         virtual bool execute() = 0;
-		virtual bool isConnector() = 0;
+		virtual int precedence() = 0;
 };
 
 #endif

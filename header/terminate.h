@@ -10,7 +10,7 @@ class Terminate : public Connector {
  	Terminate();
  	Terminate(Base*, Base*);
 	bool execute();
-	bool isConnector();
+	int precedence();
 };
 
 #endif

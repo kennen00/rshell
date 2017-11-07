@@ -10,7 +10,7 @@ class And : public Connector {
  	And();
  	And(Base*, Base*);
  	bool execute();
-	bool isConnector();
+	int precedence();
 };
 
 #endif

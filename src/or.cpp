@@ -24,6 +24,6 @@ bool Or::execute() {
 * @param None.
 * @return Bool, true if the object is a connector (true)
 */
-bool Or::isConnector() {
-	return true;
+int Or::precedence() {
+	return 1;
 }

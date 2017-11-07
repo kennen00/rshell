@@ -13,7 +13,7 @@ class Command : public Base {
         Command(std::vector<char *>);
         ~Command();
         bool execute();
-		bool isConnector();
+		int precedence();
     private:
         bool test();
 };

@@ -24,10 +24,10 @@ Command::~Command() {
 * object is a connector.
 *
 * @param None.
-* @return Bool, representing if the object is a connector (false)
+* @return Int, representing if the object is a connector (false)
 */
-bool Command::isConnector() {
-	return false;
+int Command::precedence() {
+	return 0;
 }
 
 /**
