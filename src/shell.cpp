@@ -202,6 +202,14 @@ Base* Shell::buildCommand(std::vector<std::string> &input) {
 	std::vector<char *> cmd;
 
 	for (size_t i = 0; i < input.size(); ++i) {
+		int index = input.at(i).find("\"");
+		if (index <= input.at(i).size()) 
+			input.at(i).erase(index, 1);
+
+		index = input.at(i).find("\"");
+		if (index <= input.at(i).size()) 
+			input.at(i).erase(index, 1);
+
 		cmd.push_back(toCstring(input.at(i)));
 	}
 
