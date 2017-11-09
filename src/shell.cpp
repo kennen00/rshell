@@ -138,8 +138,9 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 		if (reversedCmds.at(i)->precedence() == 2) { //Cmd is a left parenthesis
 			connectorStack.push(reversedCmds.at(i));
 		} else if (reversedCmds.at(i)->precedence() == 3) { //Cmd is a right parenthesis
-			while (connectorStack.top()->precedence() != 2 && !connectorStack.empty()) {
-				postfix.push_back(popAndReturn(connectorStack));
+			while (!connectorStack.empty() && connectorStack.top()->precedence() != 2) {
+				postfix.push_back(connectorStack.top());
+				connectorStack.pop();
 			}
 			if (!connectorStack.empty()) connectorStack.pop();
 			
@@ -147,7 +148,8 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 			if (connectorStack.empty()) {
 				connectorStack.push(reversedCmds.at(i));
 			} else {
-				postfix.push_back(popAndReturn(connectorStack));
+				postfix.push_back(connectorStack.top());
+				connectorStack.pop();
 				connectorStack.push(reversedCmds.at(i));
 			}
 		} else if (reversedCmds.at(i)->precedence() == 0) { //Cmd is a command
@@ -170,6 +172,11 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 			Connector* connector = static_cast<Connector*>(postfix.at(i));
 			connector->setLeft(left);
 			connector->setRight(right);
+
+			if (!left || !right) {
+				std::cerr << "Error: invalid input" << std::endl;
+				run();
+			}
 
 			tree.push(connector);
 		} else {
