@@ -32,9 +32,9 @@ void Shell::run() {
 	std::list<std::string> parsedInput;
 	Base* executableCmd;
 
-	while(1) {
-		std::cout << this->prompt;
-		std::getline(std::cin, cmd);
+	std::cout << this->prompt;
+
+	while(std::getline(std::cin, cmd)) {
 
 		if (cmd.front() == ' ' || cmd.front() == '#' || cmd.empty()) {
             continue;
@@ -44,6 +44,8 @@ void Shell::run() {
 		executableCmd = buildTree(parsedInput);
 		executableCmd->execute();
         delete executableCmd;
+
+		std::cout << this->prompt;
 	}
 	return;
 }
