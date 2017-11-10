@@ -95,6 +95,7 @@ std::list<std::string> Shell::parse(std::string &input) {
 */
 Base* Shell::buildTree(std::list<std::string>& commands) {
 	std::stack<Base*> stack;
+	short parenthesisCount = 0;
 
 	while (!commands.empty()) {
 		std::vector<std::string> cmd;
@@ -118,10 +119,17 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 		} else if (commands.front() == "(") {
 			stack.push(new openParen());
 			commands.pop_front();
+			parenthesisCount++;
 		} else if (commands.front() == ")") {
 			stack.push(new closeParen());
 			commands.pop_front();
+			parenthesisCount--;
 		}
+	}
+	
+	if (parenthesisCount != 0) {
+		std::cout << "Error: Uneven parenthesis" << std::endl;
+		run();
 	}
 
 	//Reverse the commands so that the tree is correct
@@ -202,7 +210,7 @@ Base* Shell::buildCommand(std::vector<std::string> &input) {
 	std::vector<char *> cmd;
 
 	for (size_t i = 0; i < input.size(); ++i) {
-		int index = input.at(i).find("\"");
+		size_t index = input.at(i).find("\"");
 		if (index <= input.at(i).size()) 
 			input.at(i).erase(index, 1);
 

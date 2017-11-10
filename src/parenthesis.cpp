@@ -7,7 +7,7 @@ bool openParen::execute() {
 }
 
 int openParen::precedence() {
-	return 2;
+	return 3;
 }
 
 closeParen::closeParen() {}
@@ -17,5 +17,5 @@ bool closeParen::execute() {
 }
 
 int closeParen::precedence() {
-	return 3;
+	return 2;
 }
