@@ -1,3 +1,4 @@
+test
 test temp/
 [temp]
 test -f temp/
@@ -7,4 +8,4 @@ test -e /usr/bin/ls
 test -d ../src && echo A
 [-f ../src] && echo A
 [-e blah] || echo B
-[blah]; [-d temp]; [-f temp/test1]; exit
+[blah]; [-d temp]; [-f temp/test1]; test; exit

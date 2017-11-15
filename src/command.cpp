@@ -66,6 +66,10 @@ bool Command::execute() {
 }
 
 bool Command::test() {
+    if (!args.at(1)) {
+        exit(1);
+        return false;
+    }
     struct stat sb;
     if (!(strcmp(args.at(1), (char *) "-e"))) {
         int error = stat(args.at(2), &sb);
