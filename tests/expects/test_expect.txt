@@ -1,0 +1,14 @@
+$ (True)
+$ (True)
+$ (False)
+$ (True)
+$ (True)
+$ (True)
+$ (True)
+A
+$ (False)
+$ (False)
+B
+$ (False)
+(True)
+(True)

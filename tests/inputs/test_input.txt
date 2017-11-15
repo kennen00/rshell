@@ -2,9 +2,9 @@ test temp/
 [temp]
 test -f temp/
 [-d temp]
-test -e ~/.bashrc
-[-f ~/.bashrc]
+test -e /usr/bin/ls
+[-f /usr/bin/ls]
 test -d ../src && echo A
 [-f ../src] && echo A
 [-e blah] || echo B
-[blah]; [-d temp]; [-f temp/file1]; exit
+[blah]; [-d temp]; [-f temp/test1]; exit
