@@ -35,8 +35,8 @@ void Shell::run() {
 	std::cout << this->prompt;
 
 	while(std::getline(std::cin, cmd)) {
-
 		if (cmd.front() == ' ' || cmd.front() == '#' || cmd.empty()) {
+            std::cout << this->prompt;
             continue;
         }
 
