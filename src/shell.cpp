@@ -94,7 +94,7 @@ std::list<std::string> Shell::parse(std::string &input) {
 * @return Base*: Point to root of command expression tree.
 */
 Base* Shell::buildTree(std::list<std::string>& commands) {
-	std::vector<Base*> reversedCmds;
+	std::vector<Base*> cmds;
 	short parenthesisCount = 0;
 
 	while (!commands.empty()) {
@@ -106,22 +106,22 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 		}
 
 		if (!cmd.empty()) {
-			reversedCmds.push_back(this->buildCommand(cmd));
+			cmds.push_back(this->buildCommand(cmd));
 		} else if (commands.front() == ";") {
-			reversedCmds.push_back(new Terminate()); 
+			cmds.push_back(new Terminate()); 
 			commands.pop_front();
 		} else if (commands.front() == "||") {
-			reversedCmds.push_back(new Or()); 
+			cmds.push_back(new Or()); 
 			commands.pop_front();
 		} else if (commands.front() == "&&") {
-			reversedCmds.push_back(new And()); 
+			cmds.push_back(new And()); 
 			commands.pop_front();
 		} else if (commands.front() == "(") {
-			reversedCmds.push_back(new openParen());
+			cmds.push_back(new openParen());
 			commands.pop_front();
 			parenthesisCount++;
 		} else if (commands.front() == ")") {
-			reversedCmds.push_back(new closeParen());
+			cmds.push_back(new closeParen());
 			commands.pop_front();
 			parenthesisCount--;
 		}
@@ -132,38 +132,30 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 		run();
 	}
 
-	//Reverse the commands so that the tree is correct
-	/*std::vector<Base*> reversedCmds;
-
-	while(!stack.empty()) {
-		reversedCmds.push_back(stack.top());
-		stack.pop();
-	}*/
-
 	//Arrange the commands to be in postfix notations
 	std::stack<Base*> connectorStack;
 	std::vector<Base*> postfix;
 
-	for (size_t i = 0; i < reversedCmds.size(); ++i) {
-		if (reversedCmds.at(i)->precedence() == 2) { //Cmd is a left parenthesis
-			connectorStack.push(reversedCmds.at(i));
-		} else if (reversedCmds.at(i)->precedence() == 3) { //Cmd is a right parenthesis
+	for (size_t i = 0; i < cmds.size(); ++i) {
+		if (cmds.at(i)->precedence() == 2) { //Cmd is a left parenthesis
+			connectorStack.push(cmds.at(i));
+		} else if (cmds.at(i)->precedence() == 3) { //Cmd is a right parenthesis
 			while (!connectorStack.empty() && connectorStack.top()->precedence() != 2) {
 				postfix.push_back(connectorStack.top());
 				connectorStack.pop();
 			}
 			if (!connectorStack.empty()) connectorStack.pop();
 			
-		} else if (reversedCmds.at(i)->precedence() == 1) { //Cmd is a connector
+		} else if (cmds.at(i)->precedence() == 1) { //Cmd is a connector
 			if (connectorStack.empty()) {
-				connectorStack.push(reversedCmds.at(i));
+				connectorStack.push(cmds.at(i));
 			} else {
 				postfix.push_back(connectorStack.top());
 				connectorStack.pop();
-				connectorStack.push(reversedCmds.at(i));
+				connectorStack.push(cmds.at(i));
 			}
-		} else if (reversedCmds.at(i)->precedence() == 0) { //Cmd is a command
-			postfix.push_back(reversedCmds.at(i));
+		} else if (cmds.at(i)->precedence() == 0) { //Cmd is a command
+			postfix.push_back(cmds.at(i));
 		}
 	}
 	
@@ -173,35 +165,32 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 
 	//Build the expression tree from the postfix notation
 	Base* tree = postfix.at(postfix.size() - 1);
-    postfix.pop_back();
-    //tree.push(postfix.at(postfix.size() - 1));
-	/*for (int i = postfix.size() - 1; i >= 2; --i) {
-		if (postfix.at(i)->precedence() == 1) {
-			//Base* left = popAndReturn(tree);
-			//Base* right = popAndReturn(tree);
-            Base* left = postfix.at(i - 1);
-            Base* right = postfix.at(i - 2);
-            postfix.pop_back();
-            postfix.pop_back();
-			
-			Connector* connector = static_cast<Connector*>(postfix.at(i));
-			connector->setLeft(left);
-			connector->setRight(right);
 
-			if (!left || !right) {
-				std::cerr << "Error: invalid input" << std::endl;
-				run();
-			}
+	try {
+    	postfix.pop_back();
 
-			tree.push(connector);
-		} else {
-			tree.push(postfix.at(i));
-		}
-	}*/
-    buildTree(tree, postfix);
+    	buildTree(tree, postfix);
+	} catch (const std::out_of_range& e) {
+		std::cerr << "Error: Invalid input\n";
+		run();
+	} catch (const std::invalid_argument& e) {
+		std::cerr << "Error: Connector used with no arguments\n";
+		run();
+	}
+
 	return tree;
 }
 
+/**
+* Recursive function to take the left node of a tree and to 
+*  build it's leftmost expression if possible. If not possible
+*  an out_of_range exception is thrown and this is caught by
+*  function.  
+*
+* @param Base*: Youngest left node in expression tree.
+* @param vector<Base*>: Remaining postfix expression.
+* @return None
+*/
 void Shell::buildTree(Base *tree, std::vector<Base*> & postfix) {
     if (!postfix.empty()) {
         Base* right = postfix.at(postfix.size() - 1);
@@ -213,12 +202,12 @@ void Shell::buildTree(Base *tree, std::vector<Base*> & postfix) {
         connector->setLeft(left);
         connector->setRight(right);
 
-        if (!left || !right) {
-            std::cerr << "Error: invalid input" << std::endl;
-            run();
-        }
         buildTree(left, postfix);
-    }
+    } else {
+		if (tree->precedence() > 0) {
+			throw std::invalid_argument("Connector with no children");
+		}
+	}
 }
 
 
