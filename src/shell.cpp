@@ -14,6 +14,7 @@
 #include <vector>		// STL vector(building commands)
 #include <stack>		// STL stack(reversing command expression)
 #include <stdlib.h>		// exit, EXIT_SUCCESS
+#include <stdexcept>	// out_of_range, invalid_input
 
 Shell::Shell(): prompt("$ ") {}
 Shell::Shell(std::string prompt): prompt(prompt) {} 
@@ -137,30 +138,35 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 	std::vector<Base*> postfix;
 
 	for (size_t i = 0; i < cmds.size(); ++i) {
-		if (cmds.at(i)->precedence() == 2) { //Cmd is a left parenthesis
+		if (cmds.at(i)->precedence() == 3) { //Cmd is a opening parenthesis
 			connectorStack.push(cmds.at(i));
-		} else if (cmds.at(i)->precedence() == 3) { //Cmd is a right parenthesis
-			while (!connectorStack.empty() && connectorStack.top()->precedence() != 2) {
+		} else if (cmds.at(i)->precedence() == 2) { //Cmd is a closing parenthesis
+			while (!connectorStack.empty() && connectorStack.top()->precedence() != 3) {
 				postfix.push_back(connectorStack.top());
 				connectorStack.pop();
 			}
-			if (!connectorStack.empty()) connectorStack.pop();
+			connectorStack.pop();
 			
 		} else if (cmds.at(i)->precedence() == 1) { //Cmd is a connector
 			if (connectorStack.empty()) {
 				connectorStack.push(cmds.at(i));
 			} else {
-				postfix.push_back(connectorStack.top());
-				connectorStack.pop();
-				connectorStack.push(cmds.at(i));
+				if (connectorStack.top()->precedence() == 3) {
+					connectorStack.push(cmds.at(i));
+				} else {
+					postfix.push_back(connectorStack.top());
+					connectorStack.pop();
+					connectorStack.push(cmds.at(i));
+				}
 			}
 		} else if (cmds.at(i)->precedence() == 0) { //Cmd is a command
 			postfix.push_back(cmds.at(i));
 		}
 	}
 	
-	if (!connectorStack.empty()) {
+	while (!connectorStack.empty()) {
 		postfix.push_back(connectorStack.top());
+		connectorStack.pop();
 	}
 
 	//Build the expression tree from the postfix notation
@@ -201,7 +207,7 @@ void Shell::buildTree(Base *tree, std::vector<Base*> & postfix) {
         Connector* connector = static_cast<Connector*>(tree);
         connector->setLeft(left);
         connector->setRight(right);
-
+		
         buildTree(left, postfix);
     } else {
 		if (tree->precedence() > 0) {
