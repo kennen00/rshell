@@ -22,7 +22,7 @@ class Shell {
  	char* toCstring(const std::string);
 	bool  isConnector(const std::string&);
 	Base* popAndReturn(std::stack<Base*>&);
-    void  buildTree(Base*, std::vector<Base*>);
+    void  buildTree(Base*, std::vector<Base*> &);
 };
 
 #endif

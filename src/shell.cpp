@@ -202,7 +202,7 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 	return tree;
 }
 
-void Shell::buildTree(Base *tree, std::vector<Base*> postfix) {
+void Shell::buildTree(Base *tree, std::vector<Base*> & postfix) {
     if (!postfix.empty()) {
         Base* right = postfix.at(postfix.size() - 1);
         postfix.pop_back();
