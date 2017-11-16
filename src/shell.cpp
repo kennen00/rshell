@@ -94,7 +94,7 @@ std::list<std::string> Shell::parse(std::string &input) {
 * @return Base*: Point to root of command expression tree.
 */
 Base* Shell::buildTree(std::list<std::string>& commands) {
-	std::stack<Base*> stack;
+	std::vector<Base*> reversedCmds;
 	short parenthesisCount = 0;
 
 	while (!commands.empty()) {
@@ -106,22 +106,22 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 		}
 
 		if (!cmd.empty()) {
-			stack.push(this->buildCommand(cmd));
+			reversedCmds.push_back(this->buildCommand(cmd));
 		} else if (commands.front() == ";") {
-			stack.push(new Terminate()); 
+			reversedCmds.push_back(new Terminate()); 
 			commands.pop_front();
 		} else if (commands.front() == "||") {
-			stack.push(new Or()); 
+			reversedCmds.push_back(new Or()); 
 			commands.pop_front();
 		} else if (commands.front() == "&&") {
-			stack.push(new And()); 
+			reversedCmds.push_back(new And()); 
 			commands.pop_front();
 		} else if (commands.front() == "(") {
-			stack.push(new openParen());
+			reversedCmds.push_back(new openParen());
 			commands.pop_front();
 			parenthesisCount++;
 		} else if (commands.front() == ")") {
-			stack.push(new closeParen());
+			reversedCmds.push_back(new closeParen());
 			commands.pop_front();
 			parenthesisCount--;
 		}
@@ -133,12 +133,12 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 	}
 
 	//Reverse the commands so that the tree is correct
-	std::vector<Base*> reversedCmds;
+	/*std::vector<Base*> reversedCmds;
 
 	while(!stack.empty()) {
 		reversedCmds.push_back(stack.top());
 		stack.pop();
-	}
+	}*/
 
 	//Arrange the commands to be in postfix notations
 	std::stack<Base*> connectorStack;
@@ -172,12 +172,17 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 	}
 
 	//Build the expression tree from the postfix notation
-	std::stack<Base*> tree;
-
-	for (size_t i = 0; i < postfix.size(); ++i) {
+	Base* tree = postfix.at(postfix.size() - 1);
+    postfix.pop_back();
+    //tree.push(postfix.at(postfix.size() - 1));
+	/*for (int i = postfix.size() - 1; i >= 2; --i) {
 		if (postfix.at(i)->precedence() == 1) {
-			Base* left = popAndReturn(tree);
-			Base* right = popAndReturn(tree);
+			//Base* left = popAndReturn(tree);
+			//Base* right = popAndReturn(tree);
+            Base* left = postfix.at(i - 1);
+            Base* right = postfix.at(i - 2);
+            postfix.pop_back();
+            postfix.pop_back();
 			
 			Connector* connector = static_cast<Connector*>(postfix.at(i));
 			connector->setLeft(left);
@@ -192,9 +197,28 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 		} else {
 			tree.push(postfix.at(i));
 		}
-	}
+	}*/
+    buildTree(tree, postfix);
+	return tree;
+}
 
-	return tree.top();
+void Shell::buildTree(Base *tree, std::vector<Base*> postfix) {
+    if (!postfix.empty()) {
+        Base* right = postfix.at(postfix.size() - 1);
+        postfix.pop_back();
+        Base* left = postfix.at(postfix.size() - 1);
+        postfix.pop_back();
+
+        Connector* connector = static_cast<Connector*>(tree);
+        connector->setLeft(left);
+        connector->setRight(right);
+
+        if (!left || !right) {
+            std::cerr << "Error: invalid input" << std::endl;
+            run();
+        }
+        buildTree(left, postfix);
+    }
 }
 
 

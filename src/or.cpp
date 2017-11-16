@@ -15,7 +15,7 @@ bool Or::execute() {
     if (!left->execute()) {
         return right->execute();
     }
-    return false;
+    return true;
 }
 
 /**
