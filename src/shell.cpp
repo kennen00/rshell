@@ -170,12 +170,28 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 	}
 
 	//Build the expression tree from the postfix notation
-	Base* tree = postfix.at(postfix.size() - 1);
+	Base* tree = 0;// = postfix.at(postfix.size() - 1);
 
 	try {
-    	postfix.pop_back();
+    //	postfix.pop_back();
 
-    	buildTree(tree, postfix);
+    	//buildTree(tree, postfix);
+    std::stack<Base *> stack;
+    for (size_t i = 0; i < postfix.size(); ++i) {
+        if (postfix.at(i)->precedence() == 1) {
+            Base *right = stack.top();
+            stack.pop();
+            Base *left = stack.top();
+            stack.pop();
+            Connector *connector = static_cast<Connector*>(postfix.at(i));
+            connector->setLeft(left);
+            connector->setRight(right);
+            stack.push(connector);
+        } else {
+            stack.push(postfix.at(i));
+        }
+    }
+    tree = stack.top();
 	} catch (const std::out_of_range& e) {
 		std::cerr << "Error: Invalid input\n";
 		run();
@@ -183,7 +199,7 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 		std::cerr << "Error: Connector used with no arguments\n";
 		run();
 	}
-
+   
 	return tree;
 }
 
@@ -198,22 +214,36 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 * @return None
 */
 void Shell::buildTree(Base *tree, std::vector<Base*> & postfix) {
-    if (!postfix.empty()) {
+    /*if (!postfix.empty()) {
         Base* right = postfix.at(postfix.size() - 1);
         postfix.pop_back();
         Base* left = postfix.at(postfix.size() - 1);
         postfix.pop_back();
 
         Connector* connector = static_cast<Connector*>(tree);
-        connector->setLeft(left);
-        connector->setRight(right);
-		
-        buildTree(left, postfix);
+        tree->setLeft(left);
+        tree->setRight(right); 
     } else {
 		if (tree->precedence() > 0) {
 			throw std::invalid_argument("Connector with no children");
 		}
-	}
+	}*/
+    std::stack<Base *> stack;
+    for (size_t i = 0; i < postfix.size(); ++i) {
+        if (postfix.at(i)->precedence() == 1) {
+            Base *right = stack.top();
+            stack.pop();
+            Base *left = stack.top();
+            stack.pop();
+            Connector *connector = static_cast<Connector*>(postfix.at(i));
+            connector->setLeft(left);
+            connector->setRight(right);
+            stack.push(connector);
+        } else {
+            stack.push(postfix.at(i));
+        }
+    }
+    tree = stack.top();
 }
 
 
