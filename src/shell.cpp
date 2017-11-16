@@ -173,77 +173,36 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 	Base* tree = 0;// = postfix.at(postfix.size() - 1);
 
 	try {
-    //	postfix.pop_back();
 
-    	//buildTree(tree, postfix);
-    std::stack<Base *> stack;
-    for (size_t i = 0; i < postfix.size(); ++i) {
-        if (postfix.at(i)->precedence() == 1) {
-            Base *right = stack.top();
-            stack.pop();
-            Base *left = stack.top();
-            stack.pop();
-            Connector *connector = static_cast<Connector*>(postfix.at(i));
-            connector->setLeft(left);
-            connector->setRight(right);
-            stack.push(connector);
-        } else {
-            stack.push(postfix.at(i));
-        }
-    }
-    tree = stack.top();
-	} catch (const std::out_of_range& e) {
-		std::cerr << "Error: Invalid input\n";
-		run();
-	} catch (const std::invalid_argument& e) {
-		std::cerr << "Error: Connector used with no arguments\n";
+    	std::stack<Base *> stack;
+    	for (size_t i = 0; i < postfix.size(); ++i) {
+    	    if (postfix.at(i)->precedence() == 1) {
+        	    Base *right = stack.top();
+        	    stack.pop();
+        	    Base *left = stack.top();
+        	    stack.pop();
+        	    Connector *connector = static_cast<Connector*>(postfix.at(i));
+
+				if (!left || !right || !connector) {
+					throw std::invalid_argument("Missing arguments");
+				}
+
+				connector->setLeft(left);
+        	    connector->setRight(right);
+        	    stack.push(connector);
+
+        	} else {
+            	stack.push(postfix.at(i));
+        	}
+    	}
+    	tree = stack.top();
+
+	} catch (const std::exception& e) {
+		std::cerr << "Error: Connector used with not enough arguments\n";
 		run();
 	}
    
 	return tree;
-}
-
-/**
-* Recursive function to take the left node of a tree and to 
-*  build it's leftmost expression if possible. If not possible
-*  an out_of_range exception is thrown and this is caught by
-*  function.  
-*
-* @param Base*: Youngest left node in expression tree.
-* @param vector<Base*>: Remaining postfix expression.
-* @return None
-*/
-void Shell::buildTree(Base *tree, std::vector<Base*> & postfix) {
-    /*if (!postfix.empty()) {
-        Base* right = postfix.at(postfix.size() - 1);
-        postfix.pop_back();
-        Base* left = postfix.at(postfix.size() - 1);
-        postfix.pop_back();
-
-        Connector* connector = static_cast<Connector*>(tree);
-        tree->setLeft(left);
-        tree->setRight(right); 
-    } else {
-		if (tree->precedence() > 0) {
-			throw std::invalid_argument("Connector with no children");
-		}
-	}*/
-    std::stack<Base *> stack;
-    for (size_t i = 0; i < postfix.size(); ++i) {
-        if (postfix.at(i)->precedence() == 1) {
-            Base *right = stack.top();
-            stack.pop();
-            Base *left = stack.top();
-            stack.pop();
-            Connector *connector = static_cast<Connector*>(postfix.at(i));
-            connector->setLeft(left);
-            connector->setRight(right);
-            stack.push(connector);
-        } else {
-            stack.push(postfix.at(i));
-        }
-    }
-    tree = stack.top();
 }
 
 
