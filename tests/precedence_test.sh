@@ -3,6 +3,7 @@
 ./start.sh
 
 ../bin/rshell < inputs/precedence_input.txt > precedence_output.txt
+echo -e "\n" >> precedence_output.txt
 
 if cmp -s precedence_output.txt expects/precedence_expect.txt; then
     echo Tests Passed!
