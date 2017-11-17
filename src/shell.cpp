@@ -156,7 +156,10 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 				postfix.push_back(connectorStack.top());
 				connectorStack.pop();
 			}
+            delete cmds.at(i);
+            Base *parenthesis = connectorStack.top();
 			connectorStack.pop();
+            delete parenthesis;
 			
 		} else if (cmds.at(i)->precedence() == 1) { //Cmd is a connector
 			if (connectorStack.empty()) {
