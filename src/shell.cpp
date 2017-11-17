@@ -36,7 +36,7 @@ void Shell::run() {
 	std::cout << this->prompt;
 
 	while(std::getline(std::cin, cmd)) {
-		if (cmd.front() == ' ' || cmd.front() == '#' || cmd.empty()) {
+		if (cmd.front() == ' ' || cmd.front() == '#' || cmd.front() == ')' || cmd.empty()) {
             std::cout << this->prompt;
             continue;
         }
@@ -214,6 +214,9 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
             	stack.push(postfix.at(i));
         	}
     	}
+        if (stack.empty()) {
+            throw std::invalid_argument("Invalid parentheses");
+        }
     	tree = stack.top();
 
 	} catch (const std::exception& e) {
