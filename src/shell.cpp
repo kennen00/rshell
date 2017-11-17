@@ -177,9 +177,14 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
     	std::stack<Base *> stack;
     	for (size_t i = 0; i < postfix.size(); ++i) {
     	    if (postfix.at(i)->precedence() == 1) {
-        	    Base *right = stack.top();
+                Base *right = 0, *left = 0;
+                if (!stack.empty()) {
+        	        right = stack.top();
+                }
         	    stack.pop();
-        	    Base *left = stack.top();
+                if (!stack.empty()) {
+        	        left = stack.top();
+                }
         	    stack.pop();
         	    Connector *connector = static_cast<Connector*>(postfix.at(i));
 
