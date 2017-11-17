@@ -23,6 +23,6 @@ bool Terminate::execute() {
 * @param None.
 * @return Bool, representing if the object is a connector (true)
 */
-bool Terminate::isConnector() {
-	return true;
+int Terminate::precedence() {
+	return 1;
 }

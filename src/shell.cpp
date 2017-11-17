@@ -5,15 +5,16 @@
 #include "../header/or.h"
 #include "../header/base.h"
 #include "../header/connector.h"
+#include "../header/parenthesis.h"
 
-#include <boost/tokenizer.hpp> //For Tokenizer parsing
-
-#include <string> 		//For string manipulation
+#include <regex>		// Parsing string input
+#include <string> 		// For string manipulation
 #include <iostream> 	// I/O streams(testing)
 #include <list>			// STL list(parsing connected commands)
 #include <vector>		// STL vector(building commands)
 #include <stack>		// STL stack(reversing command expression)
 #include <stdlib.h>		// exit, EXIT_SUCCESS
+#include <stdexcept>	// out_of_range, invalid_input
 
 Shell::Shell(): prompt("$ ") {}
 Shell::Shell(std::string prompt): prompt(prompt) {} 
@@ -32,11 +33,11 @@ void Shell::run() {
 	std::list<std::string> parsedInput;
 	Base* executableCmd;
 
-	while(1) {
-		std::cout << this->prompt;
-		std::getline(std::cin, cmd);
+	std::cout << this->prompt;
 
-		if (cmd.front() == ' ' || cmd.front() == '#' || cmd.empty()) {
+	while(std::getline(std::cin, cmd)) {
+		if (cmd.front() == ' ' || cmd.front() == '#' || cmd.front() == ')' || cmd.empty()) {
+            std::cout << this->prompt;
             continue;
         }
 
@@ -44,45 +45,53 @@ void Shell::run() {
 		executableCmd = buildTree(parsedInput);
 		executableCmd->execute();
         delete executableCmd;
+
+		std::cout << this->prompt;
 	}
 	return;
 }
  
 /**
-* Parse the user input, build command expression tree and return
-* the root node pointer.
+* Parse the user input: remove all comments, replace 
+*  test operators [ ] with test command, tokenize
+*  input by: spaces, semicolons, and parenthesis.
 *
 * @param String: User input to the shell prompt.
-* @return STL list<string>: List of arguments and connectors with spaces removed
+* @return List of strings: Tokenized input that will be
+*			passed to the build tree function.
 */
 std::list<std::string> Shell::parse(std::string &input) {
 	std::list<std::string> commands;
 
 	//Remove comments from the command string
+	bool insideQuote = false;
+	size_t index = input.size();
 	for (size_t i = 0; i < input.size(); ++i) {
-		if (input.at(i) == '#') {
-			input = input.substr(0, i);
+		if (input.at(i) == '"') {
+			insideQuote = !insideQuote;
+		}
+
+		if (!insideQuote && input.at(i) == '#') {
+			index = i;
 			break;
 		}
 	}
+	input = input.substr(0, index);
 
-	// Tokenize string by spaces
-	typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-	boost::char_separator<char> sep(" ");
+	//Replace test operators with test command ([ -e ... ] -> test -s ...)
+	std::regex test("\\[(.+?)\\]");
+	std::string replaceString = "test $1";
+	input = regex_replace(input, test, replaceString);
 
-	tokenizer tok(input, sep);
+	// Tokenize string by spaces and semicolons
+	std::regex expr("(\"([^\"]*)\")|([^\\s;\\(\\)]+)|([;\\(\\)])");
 
-	for (tokenizer::iterator tok_it = tok.begin(); tok_it != tok.end(); ++tok_it) {
-		commands.push_back(*tok_it);
-	}
+	std::regex_token_iterator<std::string::iterator> rit{input.begin(), input.end(), expr};
+	std::regex_token_iterator<std::string::iterator> rend;
 
-	for (std::list<std::string>::iterator it = commands.begin(); it != commands.end(); ++it) {
-		if (it->back() == ';' && (it->size() > 1)) {
-			it->pop_back();
-			++it;
-			commands.insert(it, ";");
-			--it;
-		}
+	while (rit != rend) {
+		commands.push_back(rit->str());
+		rit++;
 	}
 
 	return commands;
@@ -97,7 +106,8 @@ std::list<std::string> Shell::parse(std::string &input) {
 * @return Base*: Point to root of command expression tree.
 */
 Base* Shell::buildTree(std::list<std::string>& commands) {
-	std::stack<Base*> stack;
+	std::vector<Base*> cmds;
+	short parenthesisCount = 0;
 
 	while (!commands.empty()) {
 		std::vector<std::string> cmd;
@@ -108,72 +118,113 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 		}
 
 		if (!cmd.empty()) {
-			stack.push(this->buildCommand(cmd));
+			cmds.push_back(this->buildCommand(cmd));
 		} else if (commands.front() == ";") {
-			stack.push(new Terminate()); 
+			cmds.push_back(new Terminate()); 
 			commands.pop_front();
 		} else if (commands.front() == "||") {
-			stack.push(new Or()); 
+			cmds.push_back(new Or()); 
 			commands.pop_front();
 		} else if (commands.front() == "&&") {
-			stack.push(new And()); 
+			cmds.push_back(new And()); 
 			commands.pop_front();
+		} else if (commands.front() == "(") {
+			cmds.push_back(new openParen());
+			commands.pop_front();
+			parenthesisCount++;
+		} else if (commands.front() == ")") {
+			cmds.push_back(new closeParen());
+			commands.pop_front();
+			parenthesisCount--;
 		}
 	}
-
-	//Reverse the commands so that the tree is correct
-	std::vector<Base*> reversedCmds;
-
-	while(!stack.empty()) {
-		reversedCmds.push_back(stack.top());
-		stack.pop();
+	
+	if (parenthesisCount != 0) {
+		std::cout << "Error: Uneven parenthesis" << std::endl;
+		run();
 	}
 
 	//Arrange the commands to be in postfix notations
 	std::stack<Base*> connectorStack;
 	std::vector<Base*> postfix;
 
-	for (size_t i = 0; i < reversedCmds.size(); ++i) {
-		if (reversedCmds.at(i)->isConnector()) {
-			if (connectorStack.empty()) {
-				connectorStack.push(reversedCmds.at(i));
-			} else {
+	for (size_t i = 0; i < cmds.size(); ++i) {
+		if (cmds.at(i)->precedence() == 3) { //Cmd is a opening parenthesis
+			connectorStack.push(cmds.at(i));
+		} else if (cmds.at(i)->precedence() == 2) { //Cmd is a closing parenthesis
+			while (!connectorStack.empty() && connectorStack.top()->precedence() != 3) {
 				postfix.push_back(connectorStack.top());
 				connectorStack.pop();
-				connectorStack.push(reversedCmds.at(i));
 			}
-		} else {
-			postfix.push_back(reversedCmds.at(i));
-		}
-
-		if (i == reversedCmds.size() - 1) {
-			if (!connectorStack.empty()) {
-				postfix.push_back(connectorStack.top());
+            delete cmds.at(i);
+            Base *parenthesis = connectorStack.top();
+			connectorStack.pop();
+            delete parenthesis;
+			
+		} else if (cmds.at(i)->precedence() == 1) { //Cmd is a connector
+			if (connectorStack.empty()) {
+				connectorStack.push(cmds.at(i));
+			} else {
+				if (connectorStack.top()->precedence() == 3) {
+					connectorStack.push(cmds.at(i));
+				} else {
+					postfix.push_back(connectorStack.top());
+					connectorStack.pop();
+					connectorStack.push(cmds.at(i));
+				}
 			}
+		} else if (cmds.at(i)->precedence() == 0) { //Cmd is a command
+			postfix.push_back(cmds.at(i));
 		}
+	}
+	
+	while (!connectorStack.empty()) {
+		postfix.push_back(connectorStack.top());
+		connectorStack.pop();
 	}
 
 	//Build the expression tree from the postfix notation
-	std::stack<Base*> tree;
+	Base* tree = 0;// = postfix.at(postfix.size() - 1);
 
-	for (size_t i = 0; i < postfix.size(); ++i) {
-		if (postfix.at(i)->isConnector()) {
-			Base* left = tree.top();
-			tree.pop();
-			Base* right = tree.top();
-			tree.pop();
-			
-			Connector* connector = static_cast<Connector*>(postfix.at(i));
-			connector->setLeft(left);
-			connector->setRight(right);
+	try {
 
-			tree.push(connector);
-		} else {
-			tree.push(postfix.at(i));
-		}
+    	std::stack<Base *> stack;
+    	for (size_t i = 0; i < postfix.size(); ++i) {
+    	    if (postfix.at(i)->precedence() == 1) {
+                Base *right = 0, *left = 0;
+                if (!stack.empty()) {
+        	        right = stack.top();
+                }
+        	    stack.pop();
+                if (!stack.empty()) {
+        	        left = stack.top();
+                }
+        	    stack.pop();
+        	    Connector *connector = static_cast<Connector*>(postfix.at(i));
+
+				if (!left || !right || !connector) {
+					throw std::invalid_argument("Missing arguments");
+				}
+
+				connector->setLeft(left);
+        	    connector->setRight(right);
+        	    stack.push(connector);
+
+        	} else {
+            	stack.push(postfix.at(i));
+        	}
+    	}
+        if (stack.empty()) {
+            throw std::invalid_argument("Invalid parentheses");
+        }
+    	tree = stack.top();
+
+	} catch (const std::exception& e) {
+		std::cerr << "Error: Connector used with not enough arguments\n";
+		run();
 	}
-
-	return tree.top();
+   
+	return tree;
 }
 
 
@@ -189,6 +240,14 @@ Base* Shell::buildCommand(std::vector<std::string> &input) {
 	std::vector<char *> cmd;
 
 	for (size_t i = 0; i < input.size(); ++i) {
+		size_t index = input.at(i).find("\"");
+		if (index <= input.at(i).size()) 
+			input.at(i).erase(index, 1);
+
+		index = input.at(i).find("\"");
+		if (index <= input.at(i).size()) 
+			input.at(i).erase(index, 1);
+
 		cmd.push_back(toCstring(input.at(i)));
 	}
 
@@ -225,6 +284,8 @@ bool Shell::isConnector(const std::string& s) {
 	v.push_back(";");
 	v.push_back("&&");
 	v.push_back("||");
+	v.push_back("(");
+	v.push_back(")");
 
 	for (size_t i = 0; i < v.size(); ++i) {
 		if (v.at(i) == s) {
@@ -232,4 +293,15 @@ bool Shell::isConnector(const std::string& s) {
 		}
 	}
 	return false;
+}
+
+Base* Shell::popAndReturn(std::stack<Base*>& s) {
+	if (!s.empty()) {
+		Base* returnVal = s.top();
+		s.pop();
+
+		return returnVal;
+	}
+
+	return 0;
 }

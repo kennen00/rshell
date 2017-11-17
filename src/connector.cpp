@@ -14,8 +14,8 @@ Connector::~Connector() {
 * @param None.
 * @return Bool, representing if the object is a connector (true)
 */
-bool Connector::isConnector() {
-	return true;
+int Connector::precedence() {
+	return 1;
 }
 
 void Connector::setLeft(Base *left) {

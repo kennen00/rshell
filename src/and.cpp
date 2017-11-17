@@ -24,6 +24,6 @@ bool And::execute() {
 * @param None.
 * @return Bool, represting if the object is a connector (true)
 */
-bool And::isConnector() {
-	return true;
+int And::precedence() {
+	return 1;
 }

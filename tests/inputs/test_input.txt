@@ -1,0 +1,11 @@
+test
+test temp/
+[temp]
+test -f temp/
+[-d temp]
+test -e /usr/bin/ls
+[-f /usr/bin/ls]
+test -d ../src && echo A
+[-f ../src] && echo A
+[-e blah] || echo B
+[blah]; [-d temp]; [-f temp/test1]; test; exit

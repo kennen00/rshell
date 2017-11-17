@@ -1,0 +1,14 @@
+$ A
+B
+D
+$ A
+B
+$ Error: Uneven parenthesis
+$ Error: Uneven parenthesis
+$ A
+B
+$ A
+B
+D
+$ 
+
