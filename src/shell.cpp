@@ -64,7 +64,18 @@ std::list<std::string> Shell::parse(std::string &input) {
 	std::list<std::string> commands;
 
 	//Remove comments from the command string
-	size_t index = input.find("#");
+	bool insideQuote = false;
+	size_t index = input.size();
+	for (size_t i = 0; i < input.size(); ++i) {
+		if (input.at(i) == '"') {
+			insideQuote = !insideQuote;
+		}
+
+		if (!insideQuote && input.at(i) == '#') {
+			index = i;
+			break;
+		}
+	}
 	input = input.substr(0, index);
 
 	//Replace test operators with test command ([ -e ... ] -> test -s ...)
@@ -73,7 +84,7 @@ std::list<std::string> Shell::parse(std::string &input) {
 	input = regex_replace(input, test, replaceString);
 
 	// Tokenize string by spaces and semicolons
-	std::regex expr("([;\\(\\)]|[^\\s;\\(\\)]+)");
+	std::regex expr("(\"([^\"]*)\")|([^\\s;\\(\\)]+)|([;\\(\\)])");
 
 	std::regex_token_iterator<std::string::iterator> rit{input.begin(), input.end(), expr};
 	std::regex_token_iterator<std::string::iterator> rend;
