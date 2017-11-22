@@ -6,6 +6,7 @@
 #include "../header/base.h"
 #include "../header/connector.h"
 #include "../header/parenthesis.h"
+#include "../header/pipe.h"
 
 #include <regex>		// Parsing string input
 #include <string> 		// For string manipulation
@@ -136,7 +137,10 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
 			cmds.push_back(new closeParen());
 			commands.pop_front();
 			parenthesisCount--;
-		}
+		} else if (commands.front() == "|") {
+            cmds.push_back(new Pipe());
+            commands.pop_front();
+        }
 	}
 	
 	if (parenthesisCount != 0) {
@@ -286,6 +290,7 @@ bool Shell::isConnector(const std::string& s) {
 	v.push_back("||");
 	v.push_back("(");
 	v.push_back(")");
+    v.push_back("|");
 
 	for (size_t i = 0; i < v.size(); ++i) {
 		if (v.at(i) == s) {

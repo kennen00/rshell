@@ -1,11 +1,16 @@
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <cstdlib>
 #include <fcntl.h>
 
 #include "../header/pipe.h"
 
-Pipe::Pipe() : Connector(0, 0) {};
+Pipe::Pipe() : Connector(0, 0) {}
 
-Pipe::Pipe(Base* left, Base* right) : Connector(left, right) {};
+Pipe::Pipe(Base* left, Base* right) : Connector(left, right) {}
 
 bool Pipe::execute() {
     int pipefd[2];
@@ -36,4 +41,8 @@ bool Pipe::execute() {
         } while (!WIFEXITED(statVal));
     }
     return !WEXITSTATUS(statVal);    
+}
+
+int Pipe::precedence() {
+    return 1;
 }
