@@ -14,33 +14,77 @@ Pipe::Pipe(Base* left, Base* right) : Connector(left, right) {}
 
 bool Pipe::execute() {
     int pipefd[2];
-    pid_t cpid;
-    int statVal;
+    pid_t cpid1, cpid2;
+    int statVal1, statVal2;
 
     if (pipe(pipefd) == -1) {
         perror("pipe");
         return false;
     }
     
-    cpid = fork();
-    if (cpid == -1) {
+    cpid1 = fork();
+    if (cpid1 == -1) {
         perror("fork");
         exit(EXIT_FAILURE);
+        return false;
     }
 
-    if (cpid == 0) {
-        dup2(pipefd[0], 0);
-        close(pipefd[1]);
-        right->execute();
-    } else {
-        dup2(pipefd[1], 1);
-        close(pipefd[0]);
-        left->execute();
-        do {
-            waitpid(cpid, &statVal, 0);
-        } while (!WIFEXITED(statVal));
+    if (cpid1 == 0) {
+        if (close(pipefd[1]) == -1) {
+            perror("close");
+            exit(EXIT_FAILURE);
+            return false;
+        }
+        if (dup2(pipefd[0], 0) == -1) {
+            perror("dup2");
+            exit(EXIT_FAILURE);
+            return false;
+        }
+        if (!right->execute()) {
+            exit(EXIT_FAILURE);
+            return false;
+        }
+        exit(EXIT_SUCCESS);
     }
-    return !WEXITSTATUS(statVal);    
+
+    cpid2 = fork();
+    if (cpid2 == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+        return false;
+    }
+    if (cpid2 == 0) {
+        if (close(pipefd[0]) == -1) {
+            perror("close");
+            exit(EXIT_FAILURE);
+            return false;
+        }
+        if (dup2(pipefd[1], 1) == -1) {
+            perror("dup2");
+            exit(EXIT_FAILURE);
+            return false;
+        }
+        if (!left->execute()) {
+            exit(EXIT_FAILURE);
+            return false;
+        }
+        exit(EXIT_SUCCESS);
+    }
+
+    if (close(pipefd[0]) == -1) {
+        perror("close");
+        return false;
+    }
+    if (close(pipefd[1]) == -1) {
+        perror("close");
+        return false;
+    }
+    do {
+        waitpid(cpid1, &statVal1, 0);
+        waitpid(cpid2, &statVal2, 0);
+    } while (!WIFEXITED(statVal1) && !WIFEXITED(statVal2));
+
+    return !WEXITSTATUS(statVal1) && !WEXITSTATUS(statVal2);
 }
 
 int Pipe::precedence() {
