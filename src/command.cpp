@@ -65,6 +65,10 @@ bool Command::execute() {
     return !WEXITSTATUS(statVal);
 }
 
+char* Command::getFirst() {
+    return args.at(0);
+}
+
 bool Command::test() {
     if (!args.at(1)) {
         exit(1);

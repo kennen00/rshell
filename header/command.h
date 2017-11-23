@@ -14,6 +14,7 @@ class Command : public Base {
         ~Command();
         bool execute();
 		int precedence();
+        char* getFirst();
     private:
         bool test();
 };
