@@ -21,11 +21,34 @@ bool Pipe::execute() {
         perror("pipe");
         return false;
     }
-    
+ 
+    cpid2 = fork();
+    if (cpid2 == -1) {
+        perror("fork");
+        return false;
+    }
+
+    if (cpid2 == 0) {
+        if (close(pipefd[0]) == -1) {
+            perror("close");
+            exit(EXIT_FAILURE);
+            return false;
+        }
+        if (dup2(pipefd[1], 1) == -1) {
+            perror("dup2");
+            exit(EXIT_FAILURE);
+            return false;
+        }
+        if (!left->execute()) {
+            exit(EXIT_FAILURE);
+            return false;
+        }
+        exit(EXIT_SUCCESS);
+    }  
+
     cpid1 = fork();
     if (cpid1 == -1) {
         perror("fork");
-        exit(EXIT_FAILURE);
         return false;
     }
 
@@ -47,30 +70,6 @@ bool Pipe::execute() {
         exit(EXIT_SUCCESS);
     }
 
-    cpid2 = fork();
-    if (cpid2 == -1) {
-        perror("fork");
-        exit(EXIT_FAILURE);
-        return false;
-    }
-    if (cpid2 == 0) {
-        if (close(pipefd[0]) == -1) {
-            perror("close");
-            exit(EXIT_FAILURE);
-            return false;
-        }
-        if (dup2(pipefd[1], 1) == -1) {
-            perror("dup2");
-            exit(EXIT_FAILURE);
-            return false;
-        }
-        if (!left->execute()) {
-            exit(EXIT_FAILURE);
-            return false;
-        }
-        exit(EXIT_SUCCESS);
-    }
-
     if (close(pipefd[0]) == -1) {
         perror("close");
         return false;
@@ -85,6 +84,7 @@ bool Pipe::execute() {
     } while (!WIFEXITED(statVal1) && !WIFEXITED(statVal2));
 
     return !WEXITSTATUS(statVal1) && !WEXITSTATUS(statVal2);
+
 }
 
 int Pipe::precedence() {
