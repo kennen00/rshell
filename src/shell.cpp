@@ -8,6 +8,8 @@
 #include "../header/parenthesis.h"
 #include "../header/pipe.h"
 #include "../header/inputRedirect.h"
+#include "../header/singleOutputRedirect.h"
+#include "../header/doubleOutputRedirect.h"
 
 #include <regex>		// Parsing string input
 #include <string> 		// For string manipulation
@@ -143,6 +145,12 @@ Base* Shell::buildTree(std::list<std::string>& commands) {
             commands.pop_front();
         } else if (commands.front() == "<") {
             cmds.push_back(new InputRedirect());
+            commands.pop_front();
+        } else if (commands.front() == ">") {
+			cmds.push_back(new SingleOutputRedirect());
+			commands.pop_front();
+    	} else if (commands.front() == ">>") {
+            cmds.push_back(new DoubleOutputRedirect());
             commands.pop_front();
         }
 	}
@@ -296,6 +304,8 @@ bool Shell::isConnector(const std::string& s) {
 	v.push_back(")");
     v.push_back("|");
     v.push_back("<");
+	v.push_back(">");
+    v.push_back(">>");
 
 	for (size_t i = 0; i < v.size(); ++i) {
 		if (v.at(i) == s) {
