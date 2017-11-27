@@ -15,59 +15,57 @@ Pipe::Pipe(Base* left, Base* right) : Connector(left, right) {}
 bool Pipe::execute() {
     int pipefd[2];
     pid_t cpid1, cpid2;
-    int statVal1, statVal2;
+    int statVal1;
 
     if (pipe(pipefd) == -1) {
         perror("pipe");
         return false;
     }
- 
-    cpid2 = fork();
-    if (cpid2 == -1) {
-        perror("fork");
-        return false;
-    }
-
-    if (cpid2 == 0) {
-        if (close(pipefd[0]) == -1) {
-            perror("close");
-            exit(EXIT_FAILURE);
-            return false;
-        }
-        if (dup2(pipefd[1], 1) == -1) {
-            perror("dup2");
-            exit(EXIT_FAILURE);
-            return false;
-        }
-        if (!left->execute()) {
-            exit(EXIT_FAILURE);
-            return false;
-        }
-        exit(EXIT_SUCCESS);
-    }  
 
     cpid1 = fork();
-    if (cpid1 == -1) {
+    if (cpid1 < 0) {
         perror("fork");
         return false;
     }
 
     if (cpid1 == 0) {
-        if (close(pipefd[1]) == -1) {
-            perror("close");
-            exit(EXIT_FAILURE);
+        cpid2 = fork();
+        if (cpid2 == 0) {
+            if (dup2(pipefd[0], 0) == -1) {
+                perror("dup2");
+                exit(EXIT_FAILURE);
+                return false;
+            }
+            if (close(pipefd[1]) == -1) {
+                perror("close");
+                exit(EXIT_FAILURE);
+                return false;
+            }
+            if (!right->execute()) {
+                exit(EXIT_FAILURE);
+                return false;
+            }
+            exit(EXIT_SUCCESS);
+        } else if (cpid2 < 0) {
+            perror("fork");
             return false;
+        } else {
+            if (dup2(pipefd[1], 1) == -1) {
+                perror("dup2");
+                exit(EXIT_FAILURE);
+                return false;
+            }
+            if (close(pipefd[1]) == -1) {
+                perror("close");
+                exit(EXIT_FAILURE);
+                return false;
+            }
+            if (!left->execute()) {
+                exit(EXIT_FAILURE);
+                return false;
+            }
+            exit(EXIT_SUCCESS);
         }
-        if (dup2(pipefd[0], 0) == -1) {
-            perror("dup2");
-            exit(EXIT_FAILURE);
-            return false;
-        }
-        if (!right->execute()) {
-            exit(EXIT_FAILURE);
-            return false;
-        }
-        exit(EXIT_SUCCESS);
     }
 
     if (close(pipefd[0]) == -1) {
@@ -80,11 +78,9 @@ bool Pipe::execute() {
     }
     do {
         waitpid(cpid1, &statVal1, 0);
-        waitpid(cpid2, &statVal2, 0);
-    } while (!WIFEXITED(statVal1) && !WIFEXITED(statVal2));
+    } while (!WIFEXITED(statVal1));
 
-    return !WEXITSTATUS(statVal1) && !WEXITSTATUS(statVal2);
-
+    return !WEXITSTATUS(statVal1);
 }
 
 int Pipe::precedence() {
