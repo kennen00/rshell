@@ -1,0 +1,13 @@
+$ $ hello
+$ $ newstuff
+$ $ $ $ A
+hello
+$ $ A
+$ A
+$ hello
+$ $ hello
+$ A
+$ $ $ A
+B
+$ 
+
