@@ -20,7 +20,7 @@ bool DoubleOutputRedirect::execute() {
 
     pid = fork();
     if (!pid) {
-        out = open(static_cast<Command*>(right)->getFirst(), O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+        out = open(static_cast<Command*>(right)->getFirst(), O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
         if (out == -1) {
             perror("open");
