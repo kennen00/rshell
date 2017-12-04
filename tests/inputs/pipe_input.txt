@@ -1,0 +1,14 @@
+ls temp/ | grep test
+fakecommand | grep test
+ls temp/ | fakecommand
+rm temp/test2 | ls temp/
+ls temp/ | grep test | grep 1
+(ls temp/ | grep test) && echo A
+echo A && ls temp/ | grep A
+echo A || ls temp/ | grep A
+echo A; ls temp/ | grep test
+cat < temp/test1 | tr A-Z a-z | tee temp/test2 | tr a-z A-Z > temp/test4
+cat temp/test1
+cat temp/test2
+cat temp/test4
+exit
