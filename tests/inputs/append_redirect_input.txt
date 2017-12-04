@@ -1,0 +1,19 @@
+echo hello >> temp/newfile
+cat temp/newfile
+echo newstuff >> temp/test1
+cat temp/test1
+fakecommand >> temp/test3
+cat temp/test3
+echo A && echo hello >> temp/test1
+cat temp/test1
+echo A || echo hello >> temp/test2
+cat temp/test2
+echo hello >> temp/newfile && echo A
+cat temp/newfile
+echo hello >> temp/test2 || echo A
+cat temp/test2
+fakecommand >> temp/test3; echo A
+cat temp/test3
+(echo A && echo B) >> temp/newfile
+cat temp/newfile
+exit

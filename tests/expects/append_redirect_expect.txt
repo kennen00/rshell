@@ -1,0 +1,22 @@
+$ $ hello
+$ $ hello
+newstuff
+$ $ 12345
+$ $ hello
+newstuff
+A
+hello
+$ $ A
+$ A
+$ hello
+hello
+$ $ A
+hello
+$ A
+$ 12345
+$ $ hello
+hello
+A
+B
+$ 
+
