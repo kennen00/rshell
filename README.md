@@ -8,4 +8,4 @@ The R’Shell is an emulator of the Bourne Again SHell that was developed in C++
 * Kennen DeRenard
 
 ## Bugs:
-Known bugs and planned enhancements for R'Shell can be seen [here](https://github.com/cs100/rshell-hooli/issues)
+Known bugs and planned enhancements for R'Shell can be seen [here](https://github.com/kennen00/rshell/issues)
